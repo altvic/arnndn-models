@@ -153,7 +153,7 @@ Ultra Studio Suite transforms raw recordings, interviews, podcasts, and videos i
 <br>
 <h4><b><b>Quick Start</b></b></h4>
 <ol> <li>Clone the repository:
-<ul><li>git clone https://github.com/your-username/ultra-studio-suite.git</li>
+<ul><li>git clone https://github.com/altvic/arnndn-models.git</li>
 <li>cd ultra-studio-suite</li>
 </ul></li>
 <li>Install dependencies:
