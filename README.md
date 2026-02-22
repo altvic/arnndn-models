@@ -140,6 +140,169 @@ Ultra Studio Suite transforms raw recordings, interviews, podcasts, and videos i
 </li>
 
 </ol>
+
+<br><br>
+<h3><b>🎙 Model Usage Guide</b></h3>
+<ol>
+  <li>🟢 std.rnnn — Standard Balanced Model
+    <ul>
+      <li>Best For:
+        <ol>
+          <li>General-purpose voice cleanup</li>
+          <li>Being your “daily driver” model.</li>
+        </ol> 
+      </li>
+      <li>Use When:
+      <ol>
+          <li><strong>Podcasts:</strong> Ideal for long-form speech and multi-mic setups.</li>
+          <li><strong>YouTube voiceovers:</strong> Perfect for cleaning up desktop mic or lavalier recordings.</li>
+          <li><strong>Interviews:</strong> Optimized for balancing two different vocal tones and removing room tone.</li>
+          <li><strong>Dialogue recordings:</strong> Specialized handling for on-set or field recordings.</li>
+          <li><strong>Mixed indoor environments:</strong> Designed to tackle echo and common household background noise (fans, hums).</li>
+        </ol>
+      </li>
+      <li>Strengths:
+      <ol>
+         <li><strong>Balanced noise removal:</strong> Effective reduction of background hiss without muffling the source.</li>
+  <li><strong>Good speech preservation:</strong> Keeps the vocal frequencies intact and intelligible.</li>
+  <li><strong>Minimal artifacts:</strong> Avoids the "underwater" or "robotic" sounds common in heavy filtering.</li>
+  <li><strong>Safe default:</strong> A reliable setting that works for most recording environments.</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+
+  
+  <li>🔵 bd.rnnn — Broad / Deep Denoise
+  <ul>
+      <li>Best For:
+      <ol>
+          <li>Heavy background noise</li>
+          <li>When noise is severe.</li>
+        </ol>
+      </li>
+      <li>Use When:
+      <ol>
+          <li>Street recordings</li>
+  <li>Wind noise</li>
+  <li>Loud HVAC systems</li>
+  <li>Constant broadband noise</li>
+        </ol>
+      </li>
+      <li>Strengths:
+      <ol>
+          <li>Aggressive noise reduction</li>
+          <li>Strong suppression of constant noise</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  <li>🟡 cb.rnnn — Clean Broadcast
+  <ul>
+      <li>Best For:
+      <ol>
+          <li>Professional mic recordings</li>
+          <li>Already-clean audio that just needs polishing.</li>
+        </ol>
+      </li>
+      <li>Use When:
+      <ol>
+         <li>Studio microphones</li>
+        <li>Broadcast dialogue</li>
+        <li>Lavalier mics</li>
+        <li>High-quality podcast recordings</li>
+        </ol>
+      </li>
+      <li>Strengths:
+      <ol>
+          <li><strong>Gentle cleanup:</strong> Removes background noise without introducing digital artifacts</li>
+        <li><strong>Preserves tonal richness:</strong> Keeps the natural "body" and warmth of the original recording</li>
+        <li><strong>Maintains vocal brightness:</strong> Ensures clarity and "air" in the high frequencies for better intelligibility</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  <li>🟠 lq.rnnn — Low Quality Input
+  <ul>
+      <li>Best For:
+      <ol>
+          <li>Phone and compressed audio</li>
+          <li>Aggressive on high-quality studio audio.</li>
+        </ol>
+      </li>
+      <li>Use When:
+      <ol>
+         <li><strong>Zoom recordings:</strong> Fixes digital artifacts and low-bitrate compression "tinny" sounds.</li>
+        <li><strong>Phone calls:</strong> Enhances narrow-band audio and improves voice clarity.</li>
+        <li><strong>WhatsApp/VoIP audio:</strong> Cleans up jitters and background room noise from mobile devices.</li>
+        <li><strong>Heavily compressed MP3s:</strong> Restores some "warmth" lost during aggressive file size reduction.</li>
+        <li><strong>Webcam microphones:</strong> Removes the constant hum of computer fans and distant room echo.</li>
+        </ol>
+      </li>
+      <li>Strengths:
+      <ol>
+         <li><strong>Digital Artifact Handling:</strong> Processes compression noise and digital distortion with high precision.</li>
+        <li><strong>Degraded Speech Optimization:</strong> Specifically designed to restore clarity to low-quality or damaged recordings.</li>
+        <li><strong>Intelligibility Recovery:</strong> Enhances vocal frequencies to make muffled or obscured speech easy to understand.</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  <li>🔴 mp.rnnn — Multi-Purpose / Multi-Profile
+  <ul>
+      <li>Best For:
+      <ol>
+          <li>Mixed audio environments</li>
+        </ol>
+      </li>
+      <li>Use When:
+      <ol>
+          <li><strong>Switching speakers:</strong> Ideal for interviews or panels where voices have different tonal qualities.</li>
+          <li><strong>Hybrid indoor/outdoor recording:</strong> Handles the transition between controlled rooms and unpredictable ambient environments.</li>
+          <li><strong>Documentary-style recordings:</strong> Optimized for "run-and-gun" audio where microphone placement isn't always perfect.</li>
+          <li><strong>Dynamic noise conditions:</strong> Adapts to environments where background noise levels fluctuate rapidly.</li>
+        </ol>
+      </li>
+      <li>Strengths:
+      <ol>
+          <li><strong>Adaptive feel:</strong> The system intelligently adjusts its response based on the input material.</li>
+          <li><strong>Balanced performance:</strong> Provides consistent results across a wide variety of audio and video scenarios.</li>
+          <li><strong>Varied noise handling:</strong> Decently manages multiple types of background interference, from steady hums to erratic room tone.</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  <li>🟣 sh.rnnn — Speech-Heavy Focus
+  <ul>
+      <li>Best For:
+      <ol>
+          <li>Clear vocal isolation</li>
+          <li>Slightly aggressive on ambient audio.</li>
+        </ol>
+      </li>
+      <li>Use When:
+      <ol>
+         <li>Speech-only content</li>
+        <li>Audiobooks</li>
+        <li>Dialogue editing</li>
+        <li>Narration</li>
+        <li>Courtroom recordings</li>
+        </ol>
+      </li>
+      <li>Strengths:
+      <ol>
+         <li><strong>Prioritizes speech clarity:</strong> Enhances vocal frequencies to ensure every word is heard.</li>
+        <li><strong>Strong separation from background:</strong> Uses AI to isolate the voice from ambient noise.</li>
+        <li><strong>Tight vocal focus:</strong> Minimizes echo and peripheral sound for a professional "studio" feel.</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  
+</ol>
+
+
+
 <br><br>
 <h3><b>🛠️ Installation & Setup</b></h3>
 
@@ -165,7 +328,7 @@ Ultra Studio Suite transforms raw recordings, interviews, podcasts, and videos i
 <li>python app.py</li>
 </ul></li>
 <li>Access the UI:
-  <ul><li>Open http://127.0.0.1:7860 in your browser.</li>
+  <ul><li>Open http://127.0.0.1:7860 in your browser (or any local URL as displayed on the terminal).</li>
     </ul></li>
 </ol>
 <br>
@@ -173,7 +336,7 @@ Ultra Studio Suite transforms raw recordings, interviews, podcasts, and videos i
 <ul>
 <li><b>Item >	Dependency Type  >	Requirement</b></li> <br>
 <li> Project Folder >	Dynamic >	Can be moved anywhere.</li> <br>
-<li>Model File >	Name-locked >	Must be named std.rnnn and sit next to app.py.</li><br>
+<li>Model File >	Name-locked >	Must be named with a .rnnn extension name (e.g std.rnnn) and sit next to app.py.</li><br>
 <li>Output Audio >	Local	> Always saved to the script's location.</li><br>
 <li>FFmpeg >	System-locked	> Must be accessible via the command line/terminal.</li>
 </ul>

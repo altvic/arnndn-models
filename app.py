@@ -1,10 +1,24 @@
 import gradio as gr
 import subprocess
 import os
+import shutil
 
 # --- PATH CONFIGURATION ---
+import tempfile
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.abspath(os.path.join(BASE_DIR, "std.rnnn")).replace("\\", "/")
+TEMP_DIR = os.path.join(tempfile.gettempdir(), "ultra_studio_suite")
+os.makedirs(TEMP_DIR, exist_ok=True)
+
+# Clean Temp Folder on startup
+for f in os.listdir(TEMP_DIR):
+    try:
+        os.remove(os.path.join(TEMP_DIR, f))
+    except:
+        pass
+
+
+def get_available_models():
+    return sorted([f for f in os.listdir(BASE_DIR) if f.endswith(".rnnn")])
 
 
 def run_ffmpeg_cmd(command):
@@ -25,7 +39,7 @@ def get_safe_filename(original_path, custom_name, default_prefix, target_ext=Non
     else:
         final_name = f"{default_prefix}_{base}{ext}"
 
-    return os.path.join(BASE_DIR, final_name)
+    return os.path.join(TEMP_DIR, final_name)
 
 
 def is_video(filepath):
@@ -62,15 +76,16 @@ def universal_compressor(file, intensity, custom_name):
     return out_path
 
 
-def ultra_process(file, hp_f, lp_f, gate, ratio, attack, release, warmth, custom_name):
-    if not file:
+def ultra_process(file, model_name, hp_f, lp_f, gate, ratio, attack, release, warmth, custom_name):
+    if not file or not model_name:
         return None
 
     is_vid = is_video(file)
     target_ext = ".mp4" if is_vid else os.path.splitext(file)[1]
     out_path = get_safe_filename(file, custom_name, "ultra_ai", target_ext)
 
-    safe_model_path = MODEL_PATH.replace(":", "\\:").replace("'", "'\\\\''")
+    model_path = os.path.abspath(os.path.join(BASE_DIR, model_name)).replace("\\", "/")
+    safe_model_path = model_path.replace(":", "\\:").replace("'", "'\\\\''")
 
     filter_chain = (
         f"highpass=f={hp_f}, lowpass=f={lp_f}, "
@@ -113,32 +128,40 @@ def split_audio(file, split_points_str, custom_prefix):
     if not file or not split_points_str:
         return None
 
-    pts = [p.strip() for p in split_points_str.split(",") if p.strip()]
     prefix = custom_prefix.strip() if custom_prefix.strip() else "split"
-    out_pattern = os.path.join(BASE_DIR, f"{prefix}_%03d.wav")
+    session_dir = os.path.join(TEMP_DIR, f"task_{prefix}")
+    
+    if os.path.exists(session_dir):
+        # ignore_errors=True is critical for Windows stability 
+        # in case a file is still "locked" by a previous preview
+        shutil.rmtree(session_dir, ignore_errors=True) 
+    
+    os.makedirs(session_dir, exist_ok=True)
+    # -----------------------------------
+    
+    out_pattern = os.path.join(session_dir, f"{prefix}_%03d.wav")
 
     run_ffmpeg_cmd([
         "ffmpeg", "-y", "-i", file,
         "-f", "segment",
-        "-segment_times", ",".join(pts),
-        "-c", "copy",
+        "-segment_times", split_points_str.replace(" ", ""),
+        "-c:a", "pcm_s16le", 
         out_pattern
     ])
 
-    return [
-        os.path.join(BASE_DIR, f)
-        for f in os.listdir(BASE_DIR)
-        if f.startswith(f"{prefix}_") and f.endswith(".wav")
+    result_files = [
+        os.path.join(session_dir, f)
+        for f in os.listdir(session_dir)
+        if f.endswith(".wav")
     ]
+    return sorted(result_files)
 
 
-# FIXED SIGNATURE (4 args now)
 def extract_audio_advanced(video_file, fmt, bitrate, channels):
     if not video_file:
         return None
 
     out_path = get_safe_filename(video_file, "", "extracted", target_ext=fmt)
-
     cmd = ["ffmpeg", "-y", "-i", video_file, "-vn"]
 
     ch_val = "1" if channels == "Mono" else "2"
@@ -152,7 +175,6 @@ def extract_audio_advanced(video_file, fmt, bitrate, channels):
         cmd += ["-acodec", "aac", "-ab", bitrate]
 
     cmd.append(out_path)
-
     run_ffmpeg_cmd(cmd)
     return out_path
 
@@ -162,7 +184,6 @@ def merge_video_audio(video_file, audio_file, custom_name, use_compression, crf_
         return None
 
     out_path = get_safe_filename(video_file, custom_name, "merged", target_ext=".mp4")
-
     cmd = ["ffmpeg", "-y", "-i", video_file, "-i", audio_file]
 
     if use_compression:
@@ -184,6 +205,9 @@ def merge_video_audio(video_file, audio_file, custom_name, use_compression, crf_
 
 
 # --- UI ---
+available_models = get_available_models()
+default_model = "std.rnnn" if "std.rnnn" in available_models else available_models[0]
+
 with gr.Blocks(title="Ultra Studio Suite") as demo:
     gr.Markdown("# 🎙️ Ultra Studio Audio Suite")
 
@@ -193,6 +217,11 @@ with gr.Blocks(title="Ultra Studio Suite") as demo:
             with gr.Row():
                 with gr.Column():
                     u_in = gr.File(label="Input Audio or Video")
+                    u_model = gr.Dropdown(
+                        choices=available_models,
+                        value=default_model,
+                        label="Select Denoise Model (.rnnn)"
+                    )
                     u_rename = gr.Textbox(label="Rename Output (Optional)")
                     with gr.Accordion("Advanced AI Settings", open=False):
                         u_hp = gr.Slider(50, 500, 100, label="Highpass Hz")
@@ -222,7 +251,7 @@ with gr.Blocks(title="Ultra Studio Suite") as demo:
         with gr.TabItem("3. Precision Splitter"):
             with gr.Row():
                 with gr.Column():
-                    split_in = gr.Audio(type="filepath", label="Master Playback")
+                    split_in = gr.Audio(type="filepath", interactive=True, editable=True, label="Master Playback")
                     split_rename = gr.Textbox(label="Prefix for Segments")
                     split_pts = gr.Textbox(label="Split Points (Seconds)", placeholder="Input Format: 120, 00:02:00, 00:05:30, 00:39")
                     btn_run_split = gr.Button("Execute Split")
@@ -254,7 +283,7 @@ with gr.Blocks(title="Ultra Studio Suite") as demo:
                     v_merge_rename = gr.Textbox(label="Rename Merged Video")
                     btn_merge = gr.Button("Merge & Replace Audio", variant="primary")
                 with gr.Column():
-                    v_out_file = gr.File(label="Download")
+                    v_out_file = gr.File(label="Download", interactive=False)
                     v_out_preview = gr.Video(label="Preview")                   
                     
         with gr.TabItem("5. Universal Compressor"):
@@ -269,10 +298,13 @@ with gr.Blocks(title="Ultra Studio Suite") as demo:
                     c_out_file = gr.File(label="Compressed Result")
                     gr.Markdown("*Note: Video outputs as .mp4, Audio outputs as .mp3*")
 
-    # --- BINDINGS ---
-    u_btn.click(ultra_process,
-                [u_in, u_hp, u_lp, u_gate, u_ratio, u_attack, u_release, u_warm, u_rename],
-                u_out_vid).then(lambda x: x, u_out_vid, u_out_aud)
+
+   # --- BINDINGS ---   
+    u_btn.click(
+        ultra_process,
+        [u_in, u_model, u_hp, u_lp, u_gate, u_ratio, u_attack, u_release, u_warm, u_rename],
+        u_out_vid
+    ).then(lambda x: x, u_out_vid, u_out_aud)
 
     s_btn.click(standard_process,
                 [s_in, s_hp, s_fft, s_gate, s_rename],
@@ -300,6 +332,6 @@ with gr.Blocks(title="Ultra Studio Suite") as demo:
 if __name__ == "__main__":
     demo.queue().launch(
         server_name="127.0.0.1",
-        server_port=7860,
+        server_port=None,
         theme=gr.themes.Soft()
     )
